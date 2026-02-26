@@ -9,23 +9,42 @@ type Logger interface {
 	Errorf(format string, a ...any)
 }
 
+type LogLevel int
+
+const (
+	None LogLevel = iota - 1
+	Error
+	Warn
+	Info
+	Debug
+)
+
 type SimpleLogger struct {
+	Level LogLevel
 }
 
 func (l *SimpleLogger) Debugf(format string, a ...any) {
-	log.Printf("[DEBUG]"+format, a...)
+	if l.Level >= Debug {
+		log.Printf("[DEBUG]"+format, a...)
+	}
 }
 
 func (l *SimpleLogger) Infof(format string, a ...any) {
-	log.Printf("[INFO]"+format, a...)
+	if l.Level >= Info {
+		log.Printf("[INFO]"+format, a...)
+	}
 }
 
 func (l *SimpleLogger) Warnf(format string, a ...any) {
-	log.Printf("[WARN]"+format, a...)
+	if l.Level >= Warn {
+		log.Printf("[WARN]"+format, a...)
+	}
 }
 
 func (l *SimpleLogger) Errorf(format string, a ...any) {
-	log.Printf("[ERROR]"+format, a...)
+	if l.Level >= Error {
+		log.Printf("[ERROR]"+format, a...)
+	}
 }
 
 type DiscardLogger struct {

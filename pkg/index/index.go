@@ -14,7 +14,7 @@ type Index struct {
 	// Config
 	root    string
 	ttl     time.Duration
-	maxSize int64
+	maxSize int
 }
 
 func New(opts ...func(*Index)) (*Index, error) {
@@ -29,8 +29,9 @@ func New(opts ...func(*Index)) (*Index, error) {
 	}
 	var err error
 	index.cache, err = bigcache.NewBigCache(bigcache.Config{
-		Shards:     1024,
-		LifeWindow: index.ttl,
+		Shards:           1024,
+		LifeWindow:       index.ttl,
+		HardMaxCacheSize: index.maxSize,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating bigcache: %w", err)
@@ -50,7 +51,7 @@ func WithTTL(ttl time.Duration) func(*Index) {
 	}
 }
 
-func WithMaxSize(size int64) func(*Index) {
+func WithMaxSize(size int) func(*Index) {
 	return func(i *Index) {
 		i.maxSize = size
 	}

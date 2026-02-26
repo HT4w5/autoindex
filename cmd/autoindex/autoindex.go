@@ -1,18 +1,21 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/HT4w5/autoindex/internal/app"
 	"github.com/HT4w5/autoindex/internal/config"
 	"github.com/HT4w5/autoindex/internal/meta"
 	flag "github.com/spf13/pflag"
+)
+
+const (
+	exitSuccess = iota
+	exitErr
+	exitBadConfig
 )
 
 func main() {
@@ -29,12 +32,12 @@ func main() {
 
 	if showHelp {
 		flag.Usage()
-		os.Exit(0)
+		os.Exit(exitSuccess)
 	}
 
 	if showVersion {
-		fmt.Printf("%s\n", meta.VersionShort)
-		os.Exit(0)
+		fmt.Printf("%s\n", meta.VersionLong)
+		os.Exit(exitSuccess)
 	}
 
 	// Load configuration
@@ -44,52 +47,42 @@ func main() {
 	if configPath != "" {
 		err = cfg.LoadFromPath(configPath)
 		if err != nil {
-			log.Fatalf("Failed to load configuration from %s: %v", configPath, err)
+			fmt.Printf("error loading configuration from %s: %v\n", configPath, err)
+			os.Exit(exitBadConfig)
 		}
 	} else {
 		err = cfg.Load()
 		if err != nil {
-			log.Fatalf("Failed to load configuration: %v", err)
+			fmt.Printf("error loading configuration: %v\n", err)
+			os.Exit(exitBadConfig)
 		}
 	}
 
 	// Validate
 	if errs, ok := cfg.Validate(); !ok {
-		log.Fatalf("Configuration validation failed: %v", errs)
+		fmt.Printf("configuration test failed\n")
+		for _, v := range errs {
+			fmt.Println(v.Error())
+		}
+		os.Exit(exitBadConfig)
 	}
 
 	if testConfig {
-		os.Exit(0)
+		fmt.Printf("configuration test ok\n")
+		os.Exit(exitSuccess)
 	}
 
 	application := app.New(cfg)
 
 	err = application.Start()
 	if err != nil {
-		log.Fatalf("Failed to start application: %v", err)
+		os.Exit(exitErr)
 	}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	sig := <-sigChan
-	log.Printf("Received signal: %v. Shutting down...", sig)
+	<-sigChan
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	done := make(chan bool, 1)
-	go func() {
-		err := application.Shutdown()
-		if err != nil {
-			log.Printf("Error during shutdown: %v", err)
-		}
-		done <- true
-	}()
-
-	select {
-	case <-done:
-	case <-ctx.Done():
-		log.Println("Shutdown timed out")
-	}
+	application.Shutdown()
 }

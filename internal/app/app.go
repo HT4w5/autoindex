@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -70,6 +71,7 @@ func (app *Application) Start() error {
 
 	app.index, err = index.New(opts...)
 	if err != nil {
+		app.logger.Errorf("error creating index: %v", err)
 		return fmt.Errorf("error creating index: %w", err)
 	}
 
@@ -99,8 +101,18 @@ func (app *Application) Start() error {
 
 func (app *Application) Shutdown() error {
 	app.logger.Infof("shutting down application")
-	// HTTP shutdown
-	err := app.httpsrv.Shutdown()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := app.httpsrv.ShutdownWithContext(ctx)
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			app.logger.Warnf("shutdown timed out")
+		} else {
+			app.logger.Errorf("error shutting down: %v", err)
+		}
+	}
 
 	// Index close
 	return errors.Join(err, app.index.Close())

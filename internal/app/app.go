@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HT4w5/index/internal/config"
-	"github.com/HT4w5/index/pkg/index"
-	"github.com/HT4w5/index/pkg/log"
+	"github.com/HT4w5/autoindex/internal/config"
+	"github.com/HT4w5/autoindex/pkg/index"
+	"github.com/HT4w5/autoindex/pkg/log"
 	"github.com/docker/go-units"
 	"github.com/valyala/fasthttp"
 )

@@ -1,4 +1,4 @@
-module github.com/HT4w5/index
+module github.com/HT4w5/autoindex
 
 go 1.25.6
 

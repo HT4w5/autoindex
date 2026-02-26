@@ -3,7 +3,7 @@ package meta
 import "fmt"
 
 const (
-	Name = "index"
+	Name = "autoindex"
 )
 
 var (

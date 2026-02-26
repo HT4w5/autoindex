@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HT4w5/index/pkg/log"
+	"github.com/HT4w5/autoindex/pkg/log"
 	"github.com/allegro/bigcache"
 )
 

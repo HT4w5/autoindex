@@ -6,7 +6,7 @@ COMMIT=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u)
 GO_VERSION=$(shell go version | cut -d " " -f 3)
 
-LDFLAGS_BASE=-X github.com/HT4w5/index/internal/meta.Version=$(VERSION) -X github.com/HT4w5/index/internal/meta.CommitHash=$(COMMIT) -X github.com/HT4w5/index/internal/meta.GoVersion=$(GO_VERSION) -X 'github.com/HT4w5/index/internal/meta.BuildDate=$(BUILD_DATE)'
+LDFLAGS_BASE=-X github.com/HT4w5/autoindex/internal/meta.Version=$(VERSION) -X github.com/HT4w5/autoindex/internal/meta.CommitHash=$(COMMIT) -X github.com/HT4w5/autoindex/internal/meta.GoVersion=$(GO_VERSION) -X 'github.com/HT4w5/autoindex/internal/meta.BuildDate=$(BUILD_DATE)'
 
 PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 
@@ -17,7 +17,7 @@ all: build
 # Build for current native platform
 build:
 	@echo "Building $(BINARY_NAME) for host..."
-	go build -ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/index/internal/meta.Platform=$(shell go env GOOS)/$(shell go env GOARCH)" -o bin/$(BINARY_NAME) cmd/index/index.go
+	go build -ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/autoindex/internal/meta.Platform=$(shell go env GOOS)/$(shell go env GOARCH)" -o bin/$(BINARY_NAME) cmd/index/index.go
 
 # Multi-arch build target
 build-all:
@@ -28,7 +28,7 @@ build-all:
 		if [ "$$OS" = "windows" ]; then SUFFIX=".exe"; fi; \
 		echo "Building for $$OS/$$ARCH..."; \
 		GOOS=$$OS GOARCH=$$ARCH go build \
-			-ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/index/internal/meta.Platform=$$OS/$$ARCH" \
+			-ldflags "$(LDFLAGS_BASE) -X github.com/HT4w5/autoindex/internal/meta.Platform=$$OS/$$ARCH" \
 			-o bin/$(BINARY_NAME)-$$OS-$$ARCH$$SUFFIX cmd/index/index.go; \
 	)
 

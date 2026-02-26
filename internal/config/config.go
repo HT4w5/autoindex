@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/HT4w5/index/internal/meta"
+	"github.com/HT4w5/autoindex/internal/meta"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )

@@ -61,13 +61,10 @@ func main() {
 
 	application := app.New(cfg)
 
-	log.Println("Starting application...")
 	err = application.Start()
 	if err != nil {
 		log.Fatalf("Failed to start application: %v", err)
 	}
-
-	log.Println("Application started successfully")
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
@@ -89,7 +86,6 @@ func main() {
 
 	select {
 	case <-done:
-		log.Println("Shutdown completed successfully")
 	case <-ctx.Done():
 		log.Println("Shutdown timed out")
 	}

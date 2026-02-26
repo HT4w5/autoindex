@@ -1,4 +1,4 @@
-package index
+package log
 
 import "log"
 
@@ -25,25 +25,25 @@ type SimpleLogger struct {
 
 func (l *SimpleLogger) Debugf(format string, a ...any) {
 	if l.Level >= Debug {
-		log.Printf("[DEBUG]"+format, a...)
+		log.Printf("[DEBUG] "+format, a...)
 	}
 }
 
 func (l *SimpleLogger) Infof(format string, a ...any) {
 	if l.Level >= Info {
-		log.Printf("[INFO]"+format, a...)
+		log.Printf("[INFO] "+format, a...)
 	}
 }
 
 func (l *SimpleLogger) Warnf(format string, a ...any) {
 	if l.Level >= Warn {
-		log.Printf("[WARN]"+format, a...)
+		log.Printf("[WARN] "+format, a...)
 	}
 }
 
 func (l *SimpleLogger) Errorf(format string, a ...any) {
 	if l.Level >= Error {
-		log.Printf("[ERROR]"+format, a...)
+		log.Printf("[ERROR] "+format, a...)
 	}
 }
 

@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/HT4w5/index/pkg/log"
 	"github.com/allegro/bigcache"
 )
 
 type Index struct {
 	cache  *bigcache.BigCache
-	logger Logger
+	logger log.Logger
 
 	// Config
 	root    string
@@ -22,7 +23,7 @@ func New(opts ...func(*Index)) (*Index, error) {
 		root:    ".",
 		ttl:     time.Minute,
 		maxSize: 10,
-		logger:  &DiscardLogger{},
+		logger:  &log.DiscardLogger{},
 	}
 	for _, o := range opts {
 		o(index)
@@ -57,7 +58,7 @@ func WithMaxSize(size int) func(*Index) {
 	}
 }
 
-func WithLogger(logger Logger) func(*Index) {
+func WithLogger(logger log.Logger) func(*Index) {
 	return func(i *Index) {
 		i.logger = logger
 	}

@@ -3,10 +3,12 @@ package app
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/HT4w5/index/internal/config"
 	"github.com/HT4w5/index/pkg/index"
+	"github.com/HT4w5/index/pkg/log"
 	"github.com/valyala/fasthttp"
 )
 
@@ -15,6 +17,7 @@ type Application struct {
 
 	index   *index.Index
 	httpsrv *fasthttp.Server
+	logger  log.Logger
 }
 
 func New(cfg config.Config) *Application {
@@ -24,6 +27,27 @@ func New(cfg config.Config) *Application {
 }
 
 func (app *Application) Start() error {
+	var level log.LogLevel
+	switch strings.ToLower(app.cfg.Log.Level) {
+	case "none":
+		level = log.None
+	case "error":
+		level = log.Error
+	case "warn":
+		level = log.Warn
+	case "":
+		fallthrough
+	case "info":
+		level = log.Info
+	case "debug":
+		level = log.Debug
+	}
+	app.logger = &log.SimpleLogger{
+		Level: level,
+	}
+
+	app.logger.Infof("starting application")
+
 	// Create index
 	var err error
 	opts := make([]func(*index.Index), 0)
@@ -36,24 +60,8 @@ func (app *Application) Start() error {
 	if app.cfg.Cache.MaxSize != 0 {
 		opts = append(opts, index.WithMaxSize(app.cfg.Cache.MaxSize))
 	}
-	var level index.LogLevel
-	switch app.cfg.Log.Level {
-	case "none":
-		level = index.None
-	case "error":
-		level = index.Error
-	case "warn":
-		level = index.Warn
-	case "":
-		fallthrough
-	case "info":
-		level = index.Info
-	case "debug":
-		level = index.Debug
-	}
-	opts = append(opts, index.WithLogger(&index.SimpleLogger{
-		Level: level,
-	}))
+
+	opts = append(opts, index.WithLogger(app.logger))
 
 	app.index, err = index.New(opts...)
 	if err != nil {
@@ -62,7 +70,10 @@ func (app *Application) Start() error {
 
 	// HTTP listen
 	app.httpsrv = &fasthttp.Server{
-		Handler: app.HandleQuery,
+		Handler:      app.HandleQuery,
+		IdleTimeout:  10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	addr := app.cfg.HTTP.Addr
@@ -76,10 +87,13 @@ func (app *Application) Start() error {
 
 	go app.httpsrv.ListenAndServe(fmt.Sprintf("%s:%d", addr, port))
 
+	app.logger.Infof("listening at http://%s:%d", addr, port)
+
 	return nil
 }
 
 func (app *Application) Shutdown() error {
+	app.logger.Infof("shutting down application")
 	// HTTP shutdown
 	err := app.httpsrv.Shutdown()
 

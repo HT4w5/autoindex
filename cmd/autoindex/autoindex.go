@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,22 +9,22 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/HT4w5/index/internal/app"
-	"github.com/HT4w5/index/internal/config"
-	"github.com/HT4w5/index/internal/meta"
+	"github.com/HT4w5/autoindex/internal/app"
+	"github.com/HT4w5/autoindex/internal/config"
+	"github.com/HT4w5/autoindex/internal/meta"
+	flag "github.com/spf13/pflag"
 )
 
 func main() {
-	var configPath string
-	var showVersion bool
-	var showHelp bool
+	var configPath string // Path to configuration file
+	var testConfig bool   // Test config and exit
+	var showVersion bool  // Show version information
+	var showHelp bool     // Show help message
 
-	flag.StringVar(&configPath, "config", "", "Path to configuration file")
-	flag.StringVar(&configPath, "c", "", "Path to configuration file")
-	flag.BoolVar(&showVersion, "version", false, "Show version information")
-	flag.BoolVar(&showVersion, "v", false, "Show version information")
-	flag.BoolVar(&showHelp, "help", false, "Show help message")
-	flag.BoolVar(&showHelp, "h", false, "Show help message")
+	flag.StringVarP(&configPath, "config", "c", "", "path to configuration file")
+	flag.BoolVarP(&showVersion, "version", "v", false, "show version information")
+	flag.BoolVarP(&showHelp, "help", "h", false, "show help message")
+	flag.BoolVarP(&testConfig, "test", "t", false, "test config and exit")
 	flag.Parse()
 
 	if showHelp {
@@ -55,8 +54,12 @@ func main() {
 	}
 
 	// Validate
-	if msgs, ok := cfg.Validate(); !ok {
-		log.Fatalf("Configuration validation failed: %v", msgs)
+	if errs, ok := cfg.Validate(); !ok {
+		log.Fatalf("Configuration validation failed: %v", errs)
+	}
+
+	if testConfig {
+		os.Exit(0)
 	}
 
 	application := app.New(cfg)

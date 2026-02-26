@@ -32,6 +32,7 @@ func New(opts ...func(*Index)) (*Index, error) {
 	index.cache, err = bigcache.NewBigCache(bigcache.Config{
 		Shards:           1024,
 		LifeWindow:       index.ttl,
+		CleanWindow:      index.ttl,
 		HardMaxCacheSize: index.maxSize,
 	})
 	if err != nil {

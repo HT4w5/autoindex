@@ -39,7 +39,7 @@ func (i *Index) QueryBytes(path string) ([]byte, bool) {
 		i.logger.Errorf("error saving response to cache")
 	}
 
-	return respBytes, false
+	return respBytes, true
 }
 
 func (i *Index) queryFromFS(path string) (Response, bool) {

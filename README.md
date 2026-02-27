@@ -1,5 +1,33 @@
-# Index
-File autoindex service with cache.
+# Autoindex
+Autoindex service with cache.
+
+# Features
+- Size-limited cache
+- Configurable cache TTL
+- Single file info
+
+# Usage
+```console
+Usage of autoindex:
+  -c, --config string   path to configuration file
+  -h, --help            show help message
+  -t, --test            test config and exit
+  -v, --version         show version information
+```
+
+# Build
+For current platform:
+```shell
+make build
+```
+
+For all platforms:
+```shell
+make build-all
+```
+
+# Configuration
+See [example config](configs/config.example.toml).
 
 # License
 Copyright 2026 HT4w5

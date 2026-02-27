@@ -248,12 +248,12 @@ func TestQueryFile(t *testing.T) {
 }
 
 const (
-	minTestTTL = 1 * time.Second
-	maxTestTTL = 20 * time.Second
+	minTestTTL = 0 * time.Second
+	maxTestTTL = 5 * time.Second
 )
 
 func TestCacheExpiry(t *testing.T) {
-	for ttl := minTestTTL; ttl <= maxTestTTL; ttl += time.Second {
+	for ttl := minTestTTL; ttl <= maxTestTTL; ttl += 500 * time.Millisecond {
 		t.Run(
 			fmt.Sprintf("TestCacheExpiry_%s_TTL", ttl.String()),
 			func(t *testing.T) {

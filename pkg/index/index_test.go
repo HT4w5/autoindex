@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"testing"
@@ -62,7 +62,7 @@ func makeRandomDir(r *rand.Rand, t *testing.T) (string, index.Response) {
 
 	contentMap := make(map[string]index.Entry)
 
-	n := r.Intn(maxEntryCount)
+	n := r.IntN(maxEntryCount)
 
 	for range n {
 		e := makeEntry(r)
@@ -83,17 +83,17 @@ func makeRandomDir(r *rand.Rand, t *testing.T) (string, index.Response) {
 
 func makeEntry(r *rand.Rand) index.Entry {
 	var buf bytes.Buffer
-	binary.Write(&buf, binary.BigEndian, r.Int63())
+	binary.Write(&buf, binary.BigEndian, r.Int64())
 	en := index.Entry{
 		Name: hex.EncodeToString(buf.Bytes()),
 	}
-	if r.Intn(2) == 0 {
+	if r.IntN(2) == 0 {
 		// Create directory
 		en.Type = index.TypeDir
 	} else {
 		// Create file
 		en.Type = index.TypeFile
-		en.Size = r.Int63n(maxFileSize)
+		en.Size = r.Int64N(maxFileSize)
 	}
 	return en
 }
@@ -127,7 +127,9 @@ func errMsg(name string, exp any, got any) string {
 
 func TestRandomDirQuery(t *testing.T) {
 	for i := range randomTestSteps {
-		r := rand.New(rand.NewSource(int64(i)))
+		var seed [32]byte
+		binary.BigEndian.PutUint64(seed[:], uint64(i))
+		r := rand.New(rand.NewChaCha8(seed))
 		test := func(t *testing.T) {
 			dir, respExp := makeRandomDir(r, t)
 			idx, err := index.New(

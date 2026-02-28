@@ -110,26 +110,9 @@ func (i *Index) queryFilesystem(path string) (Response, bool) {
 	var resp Response
 	path = filepath.Join(i.root, path)
 
-	info, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			i.logger.Debugf("path %s not found", path)
-			return resp, false
-		}
-		i.logger.Errorf("error opening path %s: %v", path, err)
-		return resp, false
-	}
-
-	if !info.IsDir() {
-		// Handle file
-		return Response{
-			Type:  TypeFile,
-			MTime: info.ModTime().Unix(),
-			Size:  info.Size(),
-		}, true
-	} else {
+	entries, err := os.ReadDir(path)
+	if err == nil {
 		// Handle directory
-		entries, err := os.ReadDir(path)
 		if err != nil {
 			i.logger.Errorf("error reading directory %s: %v", path, err)
 			return resp, false
@@ -158,4 +141,21 @@ func (i *Index) queryFilesystem(path string) (Response, bool) {
 		}
 		return resp, true
 	}
+
+	// Handle file
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			i.logger.Debugf("path %s not found", path)
+			return resp, false
+		}
+		i.logger.Errorf("error opening path %s: %v", path, err)
+		return resp, false
+	}
+
+	return Response{
+		Type:  TypeFile,
+		MTime: info.ModTime().Unix(),
+		Size:  info.Size(),
+	}, true
 }
